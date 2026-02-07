@@ -1,22 +1,21 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import { resolve } from 'path'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { resolve } from 'path';
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   build: {
-    outDir: 'dist',
     rollupOptions: {
       input: {
-        popup: resolve(__dirname, 'index.html'),
-        // background: resolve(__dirname, 'src/background.ts'), // Future use
+        main: resolve(__dirname, 'index.html'),
+        content: resolve(__dirname, 'src/content/index.tsx'),
+        background: resolve(__dirname, 'src/background/TranslatorService.ts')
       },
       output: {
-        entryFileNames: 'assets/[name].js',
+        entryFileNames: '[name].js',
         chunkFileNames: 'assets/[name].js',
         assetFileNames: 'assets/[name].[ext]'
       }
     }
   }
-})
+});
