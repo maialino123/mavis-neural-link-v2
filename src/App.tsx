@@ -18,10 +18,14 @@ function App() {
   const [status, setStatus] = useState<'disconnected' | 'connected'>('disconnected');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const [showSettings, setShowSettings] = useState(false);
+  const [tempToken, setTempToken] = useState("");
+
   useEffect(() => {
     // Init Gateway
     chrome.storage.local.get(['token'], (result: { token?: string }) => {
       const token = result.token || DEFAULT_TOKEN;
+      setTempToken(token);
       Gateway.init(token);
     });
 
@@ -73,6 +77,35 @@ function App() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  const saveSettings = () => {
+    chrome.storage.local.set({ token: tempToken }, () => {
+      Gateway.init(tempToken);
+      setShowSettings(false);
+      addMessage("Token updated. Reconnecting...", 'agent');
+    });
+  };
+
+  if (showSettings) {
+    return (
+      <div className="flex flex-col h-screen w-full bg-[url('/bg-noise.png')] bg-cover p-4 space-y-4">
+        <h2 className="text-xl font-bold text-white mb-4">Neural Settings</h2>
+        <div className="space-y-2">
+          <label className="text-xs text-gray-400">Access Token</label>
+          <input 
+            value={tempToken}
+            onChange={(e) => setTempToken(e.target.value)}
+            className="glass-input w-full font-mono text-xs"
+            placeholder="Paste your OpenClaw token here"
+          />
+        </div>
+        <div className="flex gap-2 mt-4">
+          <button onClick={() => setShowSettings(false)} className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white flex-1">Cancel</button>
+          <button onClick={saveSettings} className="glass-btn flex-1 bg-blue-600">Save & Connect</button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-screen w-full bg-[url('/bg-noise.png')] bg-cover">
       {/* Header */}
@@ -83,7 +116,7 @@ function App() {
             MAVIS NEURAL LINK
           </h1>
         </div>
-        <button className="p-2 hover:bg-white/10 rounded-full transition-colors">
+        <button onClick={() => setShowSettings(true)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
           <Settings size={18} className="text-gray-400" />
         </button>
       </header>
