@@ -12,6 +12,7 @@ import threading
 
 # Cài đặt an toàn: Di chuột vào góc màn hình nếu muốn dừng khẩn cấp
 pyautogui.FAILSAFE = True 
+pyautogui.PAUSE = 0.01 # Giảm độ trễ giữa các lệnh để mượt hơn
 
 def human_move(x2, y2, duration=0.5):
     """
@@ -24,8 +25,8 @@ def human_move(x2, y2, duration=0.5):
     control_x = random.randint(min(x1, x2), max(x1, x2))
     control_y = random.randint(min(y1, y2), max(y1, y2))
     
-    # Số bước di chuyển
-    steps = int(duration * 60) # 60 fps
+    # Tăng số bước di chuyển để mượt hơn (120 steps cho 0.5s)
+    steps = max(int(duration * 100), 50) 
     
     for i in range(steps):
         t = i / steps
@@ -33,7 +34,7 @@ def human_move(x2, y2, duration=0.5):
         bx = (1-t)**2 * x1 + 2*(1-t)*t * control_x + t**2 * x2
         by = (1-t)**2 * y1 + 2*(1-t)*t * control_y + t**2 * y2
         
-        pyautogui.moveTo(bx, by)
+        pyautogui.platformModule._moveTo(int(bx), int(by)) # Gọi hàm low-level để mượt hơn
         time.sleep(duration / steps)
 
 def simulate_reading():
